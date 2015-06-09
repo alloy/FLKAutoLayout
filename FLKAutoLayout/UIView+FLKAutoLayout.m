@@ -149,23 +149,38 @@ typedef NSArray* (^viewChainingBlock)(UIView* view1, UIView* view2);
     return [self alignAttribute:NSLayoutAttributeBottom toAttribute:NSLayoutAttributeTop ofView:view predicate:predicate];
 }
 
+#pragma mark Layout guide constraining
 
+- (NSArray*)constrainTopSpaceToLayoutGuideOfViewController:(UIViewController *)viewController predicate:(NSString*)predicate {
+    return [self constrainTopSpaceToLayoutGuide:viewController.topLayoutGuide inView:viewController.view predicate:predicate];
+}
 
+- (NSArray*)constrainTopSpaceToLayoutGuide:(id<UILayoutSupport>)layoutGuide inView:(UIView*)inView predicate:(NSString*)predicate {
+    return [UIView alignAttribute:NSLayoutAttributeTop ofViews:@[self] toAttribute:NSLayoutAttributeBottom ofViews:@[layoutGuide] predicate:predicate commonSuperview:inView];
+}
 
 
 #pragma mark Generic constraint methods for multiple views
 
 + (NSArray*)alignAttribute:(NSLayoutAttribute)attribute ofViews:(NSArray*)ofViews toViews:(NSArray*)toViews predicate:(NSString*)predicate {
-    return [self alignAttribute:attribute ofViews:ofViews toAttribute:attribute ofViews:toViews predicate:predicate];
+    return [self alignAttribute:attribute ofViews:ofViews toViews:toViews predicate:predicate commonSuperview:nil];
+}
+
++ (NSArray*)alignAttribute:(NSLayoutAttribute)attribute ofViews:(NSArray*)ofViews toViews:(NSArray*)toViews predicate:(NSString*)predicate commonSuperview:(UIView*)commonSuperview {
+    return [self alignAttribute:attribute ofViews:ofViews toAttribute:attribute ofViews:toViews predicate:predicate commonSuperview:commonSuperview];
 }
 
 + (NSArray*)alignAttribute:(NSLayoutAttribute)attribute ofViews:(NSArray*)views toAttribute:(NSLayoutAttribute)toAttribute ofViews:(NSArray*)toViews predicate:(NSString*)predicate {
+    return [self alignAttribute:attribute ofViews:views toAttribute:toAttribute ofViews:toViews predicate:predicate commonSuperview:nil];
+}
+
++ (NSArray*)alignAttribute:(NSLayoutAttribute)attribute ofViews:(NSArray*)views toAttribute:(NSLayoutAttribute)toAttribute ofViews:(NSArray*)toViews predicate:(NSString*)predicate commonSuperview:(UIView*)commonSuperview {
     NSAssert(views.count == toViews.count || !toViews, @"Aligning attributes of multiple views to multiple views requires both view arrays to be the same length");
     FLKAutoLayoutPredicateList* predicateList = [FLKAutoLayoutPredicateList predicateListFromString:predicate];
     NSMutableArray* constraints = [NSMutableArray array];
     for (NSUInteger i = 0; i < views.count; i++) {
         NSArray* pairConstraints = [predicateList iteratePredicatesUsingBlock:^NSLayoutConstraint*(FLKAutoLayoutPredicate predicateElement) {
-            return [views[i] applyPredicate:predicateElement toView:toViews[i] fromAttribute:attribute toAttribute:toAttribute];
+            return [views[i] applyPredicate:predicateElement toItem:toViews[i] fromAttribute:attribute toAttribute:toAttribute commonSuperview:commonSuperview];
         }];
         [constraints addObjectsFromArray:pairConstraints];
     }

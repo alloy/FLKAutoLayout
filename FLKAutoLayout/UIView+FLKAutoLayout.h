@@ -48,6 +48,8 @@ FOUNDATION_EXTERN NSString * const FLKNoConstraint;
 - (NSArray*)constrainTopSpaceToView:(UIView*)view predicate:(NSString*)predicate;
 - (NSArray*)constrainBottomSpaceToView:(UIView*)view predicate:(NSString*)predicate;
 
+- (NSArray*)constrainTopSpaceToLayoutGuideOfViewController:(UIViewController *)viewController predicate:(NSString*)predicate;
+- (NSArray*)constrainTopSpaceToLayoutGuide:(id<UILayoutSupport>)layoutGuide inView:(UIView*)inView predicate:(NSString*)predicate;
 
 + (NSArray*)alignAttribute:(NSLayoutAttribute)attribute ofViews:(NSArray*)ofViews toViews:(NSArray*)toViews predicate:(NSString*)predicate;
 + (NSArray*)alignAttribute:(NSLayoutAttribute)attribute ofViews:(NSArray*)views toAttribute:(NSLayoutAttribute)toAttribute ofViews:(NSArray*)toViews predicate:(NSString*)predicate;

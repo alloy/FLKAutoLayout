@@ -24,7 +24,14 @@
 {
     NSString *description = super.description;
     NSString *asciiArtDescription = self.asciiArtDescription;
-    return [description stringByAppendingFormat:@" %@ (%@, %@)", asciiArtDescription, [self.firstItem flk_nameTag], [self.secondItem flk_nameTag]];
+    NSString *firstName = nil, *secondName = nil;
+    if ([self.firstItem respondsToSelector:@selector(flk_nameTag)]) {
+        firstName = [self.firstItem flk_nameTag];
+    }
+    if ([self.secondItem respondsToSelector:@selector(flk_nameTag)]) {
+        secondName = [self.secondItem flk_nameTag];
+    }
+    return [description stringByAppendingFormat:@" %@ (%@, %@)", asciiArtDescription, firstName, secondName];
 }
 
 #endif

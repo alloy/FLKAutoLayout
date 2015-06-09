@@ -25,29 +25,39 @@ FLKAutoLayoutPredicate FLKAutoLayoutPredicateMake(NSLayoutRelation relation, CGF
 }
 
 - (NSLayoutConstraint*)applyPredicate:(FLKAutoLayoutPredicate)predicate toView:(UIView*)view fromAttribute:(NSLayoutAttribute)fromAttribute toAttribute:(NSLayoutAttribute)toAttribute {
+    return [self applyPredicate:predicate toItem:view fromAttribute:fromAttribute toAttribute:toAttribute commonSuperview:nil];
+}
+
+- (NSLayoutConstraint*)applyPredicate:(FLKAutoLayoutPredicate)predicate toItem:(id)item fromAttribute:(NSLayoutAttribute)fromAttribute toAttribute:(NSLayoutAttribute)toAttribute commonSuperview:(UIView*)commonSuperview {
     if (predicate.priority > UILayoutPriorityRequired) return nil;
-
-    UIView* commonSuperview = [self commonSuperviewWithView:view];
+    
+    if (commonSuperview == nil) {
+        commonSuperview = [self commonSuperviewWithView:item];
+    }
     self.translatesAutoresizingMaskIntoConstraints = NO;
-
+    
     NSLayoutConstraint *constraint = [NSLayoutConstraint constraintWithItem:self
-                                              attribute:fromAttribute
-                                              relatedBy:predicate.relation
-                                                 toItem:view
-                                              attribute:toAttribute
-                                             multiplier:predicate.multiplier
-                                               constant:predicate.constant];
+                                                                  attribute:fromAttribute
+                                                                  relatedBy:predicate.relation
+                                                                     toItem:item
+                                                                  attribute:toAttribute
+                                                                 multiplier:predicate.multiplier
+                                                                   constant:predicate.constant];
     if (predicate.priority) {
         constraint.priority = predicate.priority;
     }
     [commonSuperview addConstraint:constraint];
-
+    
     return constraint;
 }
 
 - (UIView*)commonSuperviewWithView:(UIView*)view {
     if (!view) {
         return self;
+    } else if (![view isKindOfClass:[UIView class]]) {
+        // Most likely a layout guide.
+        NSAssert(NO, @"No common superview sepcified and unable to determine it automatically from %@", view);
+        return nil;
     } else if (self.superview == view) {
         return view;
     } else if (self == view.superview) {
